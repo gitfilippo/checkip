@@ -9,11 +9,10 @@
           Hostname: {{ ansible_hostname }} - Indirizzi IP:
           {% for iface in ansible_interfaces %}
             {{ iface }}:
-            {% if hostvars[inventory_hostname]['ansible_' + iface] is defined and
-                   hostvars[inventory_hostname]['ansible_' + iface].get('ipv4') is defined %}
-              {{ hostvars[inventory_hostname]['ansible_' + iface].ipv4.address }}
+            {% set iface_var = hostvars[inventory_hostname].get('ansible_' + iface) %}
+            {% if iface_var is defined and iface_var.ipv4 is defined %}
+              {{ iface_var.ipv4.address }}
             {% else %}
               Nessun indirizzo IPv4 assegnato
             {% endif %}
           {% endfor %}
-
