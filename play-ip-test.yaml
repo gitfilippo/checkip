@@ -5,14 +5,15 @@
   tasks:
     - name: Recupera gli indirizzi IP delle interfacce
       debug:
-        msg: >
-          Hostname: {{ ansible_hostname }} - Indirizzi IP:
+        msg: |
+          Hostname: {{ ansible_hostname }}
+          Indirizzi IP delle interfacce:
           {% for iface in ansible_interfaces %}
-            {{ iface }}:
-            {% set iface_var = hostvars[inventory_hostname].get('ansible_' + iface) %}
-            {% if iface_var is defined and iface_var.ipv4 is defined %}
-              {{ iface_var.ipv4.address }}
-            {% else %}
-              Nessun indirizzo IPv4 assegnato
-            {% endif %}
+            - Interfaccia {{ iface }}:
+              {% set iface_var = hostvars[inventory_hostname].get('ansible_' + iface) %}
+              {% if iface_var is defined and iface_var.ipv4 is defined %}
+                Indirizzo IPv4: {{ iface_var.ipv4.address }}
+              {% else %}
+                Nessun indirizzo IPv4 assegnato
+              {% endif %}
           {% endfor %}
