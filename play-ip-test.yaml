@@ -1,18 +1,38 @@
 ---
+- name: Ottieni tutti gli indirizzi IP delle interfacce di rete
+  hosts: all
+  gather_facts: yes
+  tasks:
+    - name: Recupera gli indirizzi IP delle interfacce
+      debug:
+        msg: |
+          Hostname: {{ ansible_hostname }}
+          Indirizzi IP delle interfacce:
+          {% for iface in ansible_interfaces %}
+            - Interfaccia {{ iface }}:
+              {% set iface_var = hostvars[inventory_hostname].get('ansible_' + iface) %}
+              {% if iface_var is defined and iface_var.ipv4 is defined %}
+                Indirizzo IPv4: {{ iface_var.ipv4.address }}
+              {% else %}
+                Nessun indirizzo IPv4 assegnato
+              {% endif %}
+          {% endfor %}
+
+---
 - name: Ottieni tutti gli indirizzi IP delle interfacce di rete in formato CSV
   hosts: all
   gather_facts: yes
   tasks:
     - name: Inizializza il file CSV
       copy:
-        dest: /home/filippo/indirizzi_ip.csv
+        dest: /tmp/indirizzi_ip.csv
         content: "Hostname,Interfaccia,Indirizzo IPv4\n"
         force: yes
       delegate_to: localhost
 
     - name: Aggiungi indirizzi IP delle interfacce al file CSV
       lineinfile:
-        path: /home/filippo/indirizzi_ip.csv
+        path: /tmp/indirizzi_ip.csv
         line: "{{ ansible_hostname }},{{ iface }},{{ iface_var.ipv4.address if (iface_var is defined and iface_var.ipv4 is defined) else 'Nessun indirizzo IPv4 assegnato' }}"
         create: yes
       delegate_to: localhost
