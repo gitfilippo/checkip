@@ -1,12 +1,17 @@
 ---
-- name: Ottenere indirizzi IP delle interfacce di rete
+- name: Ottieni tutti gli indirizzi IP delle interfacce di rete
   hosts: all
-  gather_facts: no
+  gather_facts: yes
   tasks:
-    - name: Esegui il comando ip address
-      ansible.builtin.command: ip address
-      register: ip_output
-
-    - name: Mostra l'output degli indirizzi IP
-      ansible.builtin.debug:
-        msg: "{{ ip_output.stdout_lines }}"
+    - name: Recupera gli indirizzi IP delle interfacce
+      debug:
+        msg: >
+          Hostname: {{ ansible_hostname }} - Indirizzi IP:
+          {% for iface in ansible_interfaces %}
+            {{ iface }}:
+            {% if hostvars[inventory_hostname]['ansible_' + iface] is defined %}
+              {{ hostvars[inventory_hostname]['ansible_' + iface].ipv4.address }}
+            {% else %}
+              Nessun indirizzo IP assegnato
+            {% endif %}
+          {% endfor %}
