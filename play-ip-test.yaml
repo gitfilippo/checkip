@@ -1,6 +1,12 @@
 ---
-- hosts: localhost
-  connection: local
+- name: Ottenere indirizzi IP delle interfacce di rete
+  hosts: all
+  gather_facts: no
   tasks:
-    - debug: var=ansible_all_ipv4_addresses
-    - debug: var=ansible_default_ipv4.address
+    - name: Esegui il comando ip address
+      ansible.builtin.command: ip address
+      register: ip_output
+
+    - name: Mostra l'output degli indirizzi IP
+      ansible.builtin.debug:
+        msg: "{{ ip_output.stdout_lines }}"
