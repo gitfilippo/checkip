@@ -8,15 +8,21 @@
       register: ip_addresses
       changed_when: false
 
-    - name: Display IP addresses
-      ansible.builtin.debug:
-        msg: "IP addresses on {{ inventory_hostname }}:\n{{ ip_addresses.stdout_lines | to_nice_yaml }}"
-
     - name: Get interface details
       ansible.builtin.shell: ip link show
       register: interfaces
       changed_when: false
 
-    - name: Display interface details  
+    - name: Create CSV output
+      ansible.builtin.copy:
+        content: |
+          hostname,ip_address,interface
+          {% for ip in ip_addresses.stdout_lines %}
+          {{ inventory_hostname }},{{ ip }},{{ interfaces.stdout_lines[loop.index0] | regex_replace('^[0-9]+: ([^:]+):.*$', '\\1') }}
+          {% endfor %}
+        dest: "./network_info_{{ inventory_hostname }}.csv"
+      delegate_to: localhost
+
+    - name: Display CSV file location
       ansible.builtin.debug:
-        msg: "Network interfaces on {{ inventory_hostname }}:\n{{ interfaces.stdout_lines | to_nice_yaml }}"
+        msg: "CSV file created at: ./network_info_{{ inventory_hostname }}.csv"
