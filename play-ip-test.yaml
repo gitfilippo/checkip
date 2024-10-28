@@ -1,20 +1,22 @@
 ---
-- name: Ottieni tutti gli indirizzi IP delle interfacce di rete in formato CSV
+- name: Get IP addresses from Linux servers
   hosts: all
-  gather_facts: yes
+  gather_facts: true
   tasks:
-    - name: Inizializza variabile per CSV
-      set_fact:
-        csv_data: "Hostname,Interfaccia,Indirizzo IPv4\n"
+    - name: Get IP addresses for all interfaces
+      ansible.builtin.shell: ip addr show | grep "inet " | awk '{print $2}'
+      register: ip_addresses
+      changed_when: false
 
-    - name: Aggiungi indirizzi IP delle interfacce alla variabile CSV
-      set_fact:
-        csv_data: "{{ csv_data }}{{ ansible_hostname }},{{ iface_var.ipv4.address if (iface_var is defined and iface_var.ipv4 is defined) else 'Nessun indirizzo IPv4 assegnato' }}\n"
-      loop: "{{ ansible_interfaces }}"
-      vars:
-        iface_var: "{{ hostvars[inventory_hostname].get('ansible_' + item) }}"
+    - name: Display IP addresses
+      ansible.builtin.debug:
+        msg: "IP addresses on {{ inventory_hostname }}:\n{{ ip_addresses.stdout_lines | to_nice_yaml }}"
 
-    - name: Stampa il file CSV
-      debug:
-        msg: "{{ csv_data }}"
+    - name: Get interface details
+      ansible.builtin.shell: ip link show
+      register: interfaces
+      changed_when: false
 
+    - name: Display interface details  
+      ansible.builtin.debug:
+        msg: "Network interfaces on {{ inventory_hostname }}:\n{{ interfaces.stdout_lines | to_nice_yaml }}"
