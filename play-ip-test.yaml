@@ -13,16 +13,11 @@
       register: interfaces
       changed_when: false
 
-    - name: Create CSV output
-      ansible.builtin.copy:
-        content: |
+    - name: Display CSV formatted output
+      ansible.builtin.debug:
+        msg: |
           hostname,ip_address,interface
           {% for ip in ip_addresses.stdout_lines %}
           {{ inventory_hostname }},{{ ip }},{{ interfaces.stdout_lines[loop.index0] | regex_replace('^[0-9]+: ([^:]+):.*$', '\\1') }}
           {% endfor %}
-        dest: "./network_info_{{ inventory_hostname }}.csv"
-      delegate_to: localhost
 
-    - name: Display CSV file location
-      ansible.builtin.debug:
-        msg: "CSV file created at: ./network_info_{{ inventory_hostname }}.csv"
