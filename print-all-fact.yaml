@@ -1,8 +1,12 @@
 ---
-- name: Print Ansible Facts using vars lookup
+- name: Print Ansible Facts in JSON format
   hosts: all
   gather_facts: yes
   tasks:
-    - name: Print ansible_hostname fact
+    - name: Print all facts as JSON
       debug:
-        msg: "{{ lookup('vars', 'ansible_hostname') }}"
+        msg: "{{ ansible_facts | to_nice_json }}"
+    
+    - name: Print all facts as YAML
+      debug:
+        msg: "{{ ansible_facts | to_nice_yaml }}"
