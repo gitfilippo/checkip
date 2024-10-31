@@ -1,12 +1,12 @@
 ---
-- name: Print Ansible Facts in JSON format
+- name: Store and Print Ansible Facts
   hosts: all
   gather_facts: yes
   tasks:
-    - name: Print all facts as JSON
+    - name: Store all facts in a custom variable
+      set_fact:
+        my_facts: "{{ ansible_facts }}"
+
+    - name: Print stored facts
       debug:
-        msg: "{{ ansible_facts | to_nice_json }}"
-    
-    - name: Print all facts as YAML
-      debug:
-        msg: "{{ ansible_facts | to_nice_yaml }}"
+        var: my_facts
