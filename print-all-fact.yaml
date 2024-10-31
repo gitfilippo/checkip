@@ -1,12 +1,8 @@
 ---
-- name: Store and Print Ansible Facts
+- name: Print Ansible Facts using vars lookup
   hosts: all
   gather_facts: yes
   tasks:
-    - name: Store all facts in a custom variable
-      set_fact:
-        my_facts: "{{ ansible_facts }}"
-
-    - name: Print stored facts
+    - name: Print ansible_hostname fact
       debug:
-        var: my_facts
+        msg: "{{ lookup('vars', 'ansible_hostname') }}"
